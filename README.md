@@ -1,51 +1,47 @@
-# Probe Sets for Nonlinear Kalman Filtering
+# Mitigating Overconfidence in Nonlinear Kalman Filters via Covariance Recalibration
 
-Python code for **“Probe Sets for Nonlinear Kalman Filtering: Multi-Center
-Gains and Covariance Recalibration.”** See the paper for the methods and
-experimental setup.
+This repository contains the code for the paper published in [*Automatica* 194 (2026), 113295](https://doi.org/10.1016/j.automatica.2026.113295). A [preprint is available on arXiv](https://arxiv.org/abs/2407.05717).
 
-Covariances are propagated as square-root factors using QR and Joseph updates.
-NEES is calculated directly from these factors.
+In the paper, we introduce a new covariance-recalibrated framework that can reduce the state estimation errors of various types of nonlinear Kalman filters by more than an order of magnitude. The nonlinear Kalman filters investigated in the paper include the extended Kalman filter, second-order extended Kalman filter, unscented Kalman filter, and cubature Kalman filter.
 
-## Install and test
+Running these codes allows you to reproduce all the figures in the paper. The five MATLAB scripts in the root directory correspond to the five applications studied in the paper:
 
-Requires Python 3.11 or newer.
+| Script | Application |
+| --- | --- |
+| `Target_tracking.m` | 3D target tracking |
+| `Terrain_referenced_navigation.m` | Terrain-referenced navigation |
+| `Synchronous_generator_state_estimation.m` | Synchronous generator state estimation |
+| `Pendulum_state_estimation.m` | Pendulum state estimation |
+| `Battery_state_estimation.m` | Battery state estimation |
 
-```bash
-python -m pip install -r requirements.txt
-python test_filters.py
+`Supplementary_Material.pdf` contains the detailed algorithm listings for the EKF, EKF2, CKF, UKF, and the conventional IEKF benchmark, together with additional results for the "back out" step.
+
+## Notes on the code
+
+The iterated EKF2 (IEKF2) is implemented and simulated in the scripts, but its curves are not drawn, because the figures in the paper do not include them. To display the IEKF2 results, uncomment the corresponding plotting lines (the `h6_1` handle) and the associated runtime `disp` lines.
+
+## Updates
+
+**2025-02-04:** In UKF and CKF, `sqrtm(Variance)` is now replaced by `chol(Variance).'`, making the algorithm faster.
+
+**2025-11-25:** We conducted additional experiments to validate the need for the "back out" step. The related code can be found in the folder `Necessity_of_back_out`. Additionally, the newly uploaded `Target_tracking_ANEE.m` compares the accuracy of covariance estimation between the old and new frameworks.
+
+**2026-07-31:** The paper has been accepted by *Automatica*.
+
+## How to cite
+
+```bibtex
+@article{jiang2026mitigating,
+  title={Mitigating Overconfidence in Nonlinear {K}alman Filters via Covariance Recalibration},
+  author={Jiang, Shida and Shi, Junzhe and Moura, Scott},
+  journal={Automatica},
+  volume={194},
+  pages={113295},
+  year={2026},
+  doi={10.1016/j.automatica.2026.113295}
+}
 ```
 
-## Run
+## Related work
 
-Run the paper experiments, saving summaries and per-run data for later reuse:
-
-```bash
-python run_paper.py --output-dir results/revised --jobs 8 --save-data --keep-cache
-```
-
-Adjust the worker count as needed. For a quick workflow check:
-
-```bash
-python run_paper.py --quick --output-dir results/quick --jobs 2
-```
-
-The output folder contains seven figures and two LaTeX tables. Summary CSVs
-are included with `--save-data`. With `--keep-cache`, per-run data remain in
-`results/.revised_cache/` for the example above.
-
-## Reuse results
-
-Regenerate the tables or sweep figures from saved CSVs:
-
-```bash
-python paper_tables.py results/revised/setups_v4_order_r1000.csv --output-dir results/revised
-python sweep_all.py all --figures-only --input-dir results/revised --output-dir results/revised
-```
-
-These commands reuse the completed simulations. Add `--setup-cache-dir PATH`
-to `run_paper.py` to reuse compatible randomized-study NPZ files and run
-missing cells. Its `--from-results PATH` option rebuilds the complete output
-set from summary CSVs and performs a fresh runtime benchmark.
-
-Use each script's `--help` option for further arguments.
+Our follow-up paper, [Probe Sets for Nonlinear Kalman Filtering: Multi-Center Gains and Covariance Recalibration](https://arxiv.org/abs/2609.14271), uses covariance-scaled probe sets to account for local model variation in both gain selection and covariance recalibration.
